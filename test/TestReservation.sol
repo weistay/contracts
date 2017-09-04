@@ -1,25 +1,15 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.11;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
-import "../contracts/MetaCoin.sol";
+import "../contracts/Reservation.sol";
 
-contract TestMetacoin {
+contract TestReservation {
 
-  function testInitialBalanceUsingDeployedContract() {
-    MetaCoin meta = MetaCoin(DeployedAddresses.MetaCoin());
+    function testContractCreation() {
+        Reservation tReservation = new Reservation(1564555780, 1, 1, 1600000000, 200000000);
 
-    uint expected = 10000;
-
-    Assert.equal(meta.getBalance(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
-  }
-
-  function testInitialBalanceWithNewMetaCoin() {
-    MetaCoin meta = new MetaCoin();
-
-    uint expected = 10000;
-
-    Assert.equal(meta.getBalance(tx.origin), expected, "Owner should have 10000 MetaCoin initially");
-  }
+        Assert.equal(tReservation.amountPerGuest(), 2 ether, "Each guest should pay 2 ether");
+    }
 
 }
