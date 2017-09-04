@@ -8,12 +8,12 @@ contract Reservation is Ownable {
     using SafeMath for uint256;
 
     enum States {
-        OpenReservation,
-        BookedReservation,
-        CancelledReservation,
-        BookingActive,
-        BookingFinished,
-        BookingDisputed
+    OpenReservation,
+    BookedReservation,
+    CancelledReservation,
+    BookingActive,
+    BookingFinished,
+    BookingDisputed
     }
 
     uint public guestTotal;
@@ -23,6 +23,7 @@ contract Reservation is Ownable {
 
     uint public reservationTotalAmount;
     uint public refundableDamageDepositAmount;
+    uint public totalAmountPaid;
 
     uint public nights;
     uint public arrivalTimestamp;
@@ -30,9 +31,9 @@ contract Reservation is Ownable {
     uint public createdTimestamp = block.timestamp;
 
     struct Guest {
-        address guestAddress;
-        uint amountPaid;
-        uint paidTimestamp;
+    address guestAddress;
+    uint amountPaid;
+    uint paidTimestamp;
     }
 
     uint public guestsCount = 0;
@@ -78,11 +79,36 @@ contract Reservation is Ownable {
     // When allowing a reservation we will need to check that they have paid the correct amount per guest
     function makeReservation() payable atCurrentState(States.OpenReservation) guestLimitNotReached {
         require(msg.value == amountPerGuest);
+
         guestsCount = guestsCount + 1;
+        totalAmountPaid = totalAmountPaid + msg.value;
 
         guests[msg.sender].guestAddress = msg.sender;
         guests[msg.sender].amountPaid = msg.value;
         guests[msg.sender].paidTimestamp = block.timestamp;
+
+        // We now need to check if this contract can move forward
+        performOpenReservationStateCheck();
+
+    }
+
+    function performOpenReservationStateCheck() internal {
+        if (currentState != States.OpenReservation) {
+            return;
+        }
+
+        // Requirements to move from open to booked is the guest total fulfilled & total amount met
+        if (isGuestCapacityMet() && isTotalAmountPaid()) {
+            currentState = States.BookedReservation;
+        }
+    }
+
+    function isGuestCapacityMet() returns (bool) {
+        return guestsCount == guestTotal;
+    }
+
+    function isTotalAmountPaid() returns (bool) {
+        return totalAmountPaid == reservationTotalAmount;
     }
 
 }
