@@ -186,9 +186,9 @@ contract Reservation is Ownable {
     }
     
     function isContract(address addr) view returns (bool) {
-      uint size;
-      assembly { size := extcodesize(addr) }
-      return size > 0;
+        uint size;
+        assembly { size := extcodesize(addr) }
+        return size > 0;
     }
 
 }
