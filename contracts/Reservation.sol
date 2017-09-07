@@ -22,9 +22,10 @@ contract Reservation is Ownable {
     // Calculated on Constructor
     uint public amountPerGuest;
 
+    uint public totalAmountPaid;
+    uint public totalAmountRefunded;
     uint public reservationTotalAmount;
     uint public refundableDamageDepositAmount;
-    uint public totalAmountPaid;
 
     uint public nights;
     uint public arrivalTimestamp;
@@ -35,6 +36,8 @@ contract Reservation is Ownable {
         address guestAddress;
         uint amountPaid;
         uint paidTimestamp;
+        bool exists;
+        bool refunded;
     }
 
     uint public guestsCount = 0;
@@ -56,7 +59,7 @@ contract Reservation is Ownable {
         require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
         require(_refundableDamageDepositAmount >= 0 && _refundableDamageDepositAmount < _reservationTotalAmount);
 
-        amountPerGuest = _reservationTotalAmount / nGuestTotal;
+        amountPerGuest = _reservationTotalAmount / _guestTotal;
         // Ensure that the total amount will not result in a higher amount than the total
         require(amountPerGuest > 0 && (amountPerGuest * _guestTotal) <= _reservationTotalAmount);
 
@@ -64,7 +67,7 @@ contract Reservation is Ownable {
         guestTotal = _guestTotal;
 
         arrivalTimestamp = _arrivalTimestamp;
-        departureTimestamp = _arrivalTimestamp + (nNights * 86400);
+        departureTimestamp = _arrivalTimestamp + (_nights * 86400);
 
         reservationTotalAmount = _reservationTotalAmount;
         refundableDamageDepositAmount = _refundableDamageDepositAmount;
@@ -83,27 +86,66 @@ contract Reservation is Ownable {
         _;
     }
 
+    // Default function is to throw as we don't want any funny business
+    function() payable {
+        revert();
+    }
+
     // Allow a reservation to be made if the contract is in OpenReservation state AND guest limit is not reached
     // However, if we reach the guest limit with this reservation, this contract needs to move to the Booked state.
     // When allowing a reservation we will need to check that they have paid the correct amount per guest
     function makeReservation() payable atCurrentState(States.OpenReservation) guestLimitNotReached {
+        // Each guest cannot pay more than the allocated amount
         require(msg.value == amountPerGuest);
+        // Whole contract not overpaid
+        require(totalAmountPaid < reservationTotalAmount);
+        // Make sure guest has not already paid, use false check as its more clear
+        require(guests[msg.sender].exists == false);
 
-        guestsCount = guestsCount + 1;
+        guestsCount ++;
         totalAmountPaid = totalAmountPaid + msg.value;
 
         guests[msg.sender].guestAddress = msg.sender;
         guests[msg.sender].amountPaid = msg.value;
         guests[msg.sender].paidTimestamp = block.timestamp;
+        guests[msg.sender].exists = true;
 
         // We now need to check if this contract can move forward
         performOpenReservationStateCheck();
     }
 
-    function cancelReservation() {
+    // The cancel action is for the owner of the contract; only works in open/booked states
+    // It will change the state to cancelled where all guests will be able to withdraw their ether
+    function cancelReservation() onlyOwner {
         require(currentState == States.OpenReservation || currentState == States.BookedReservation);
 
+        currentState == States.CancelledReservation;
+    }
 
+    // Let guests withdraw their amount if the reservation is cancelled
+    function withdrawPaidAmount() external atCurrentState(States.CancelledReservation) {
+        // Make sure this sender exists
+        require(guests[msg.sender].exists);
+        require(guests[msg.sender].refunded == false);
+
+        // Set refunded to true now before we send
+        guests[msg.sender].refunded = true;
+        uint refundAmount = guests[msg.sender].amountPaid;
+        totalAmountRefunded = totalAmountRefunded + refundAmount;
+
+        if (!msg.sender.send(refundAmount)) {
+            // If the send failed then reset now
+            guests[msg.sender].refunded = false;
+            totalAmountRefunded = totalAmountRefunded - refundAmount;
+        }
+    }
+
+    function destroy() onlyOwner {
+        selfdestruct(owner);
+    }
+
+    function destroyAndSend(address _recipient) onlyOwner {
+        selfdestruct(_recipient);
     }
 
     function performOpenReservationStateCheck() internal {
