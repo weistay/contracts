@@ -3,17 +3,18 @@ pragma solidity ^0.4.11;
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
+
 contract Reservation is Ownable {
 
     using SafeMath for uint256;
 
     enum States {
-    OpenReservation,
-    BookedReservation,
-    CancelledReservation,
-    BookingActive,
-    BookingFinished,
-    BookingDisputed
+        OpenReservation,
+        BookedReservation,
+        CancelledReservation,
+        BookingActive,
+        BookingFinished,
+        BookingDisputed
     }
 
     uint public guestTotal;
@@ -31,9 +32,9 @@ contract Reservation is Ownable {
     uint public createdTimestamp = block.timestamp;
 
     struct Guest {
-    address guestAddress;
-    uint amountPaid;
-    uint paidTimestamp;
+        address guestAddress;
+        uint amountPaid;
+        uint paidTimestamp;
     }
 
     uint public guestsCount = 0;
@@ -42,28 +43,36 @@ contract Reservation is Ownable {
     // Start in open reservation state
     States public currentState = States.OpenReservation;
 
-    function Reservation(uint nArrivalTimestamp, uint nNights, uint nGuestTotal, uint nReservationTotalAmount, uint nRefundableDamageDepositAmount) {
-        require(nNights > 0 && nNights < 30);
-        require(nGuestTotal > 0 && nGuestTotal < 100);
-        require(nArrivalTimestamp > createdTimestamp);
-        require(nReservationTotalAmount > 0 && nReservationTotalAmount < 100 ether);
-        require(nRefundableDamageDepositAmount >= 0 && nRefundableDamageDepositAmount < nReservationTotalAmount);
+    function Reservation(
+        uint _arrivalTimestamp,
+        uint _nights,
+        uint _guestTotal,
+        uint _reservationTotalAmount,
+        uint _refundableDamageDepositAmount
+    ) {
+        require(_nights > 0 && _nights < 30);
+        require(_guestTotal > 0 && _guestTotal < 100);
+        require(_arrivalTimestamp > createdTimestamp);
+        require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
+        require(_refundableDamageDepositAmount >= 0 && _refundableDamageDepositAmount < _reservationTotalAmount);
 
-        amountPerGuest = nReservationTotalAmount / nGuestTotal;
+        amountPerGuest = _reservationTotalAmount / nGuestTotal;
         // Ensure that the total amount will not result in a higher amount than the total
-        require(amountPerGuest > 0 && (amountPerGuest * nGuestTotal) <= nReservationTotalAmount);
+        require(amountPerGuest > 0 && (amountPerGuest * _guestTotal) <= _reservationTotalAmount);
 
-        nights = nNights;
-        guestTotal = nGuestTotal;
+        nights = _nights;
+        guestTotal = _guestTotal;
 
-        arrivalTimestamp = nArrivalTimestamp;
-        departureTimestamp = nArrivalTimestamp + (nNights * 86400);
+        arrivalTimestamp = _arrivalTimestamp;
+        departureTimestamp = _arrivalTimestamp + (nNights * 86400);
 
-        reservationTotalAmount = nReservationTotalAmount;
-        refundableDamageDepositAmount = nRefundableDamageDepositAmount;
+        reservationTotalAmount = _reservationTotalAmount;
+        refundableDamageDepositAmount = _refundableDamageDepositAmount;
     }
 
     modifier atCurrentState(States _currentState) {
+        checkIfBookingActiveOrFinished();
+
         require(currentState == _currentState);
         _;
     }
@@ -89,6 +98,11 @@ contract Reservation is Ownable {
 
         // We now need to check if this contract can move forward
         performOpenReservationStateCheck();
+    }
+
+    function cancelReservation() {
+        require(currentState == States.OpenReservation || currentState == States.BookedReservation);
+
 
     }
 
@@ -100,6 +114,19 @@ contract Reservation is Ownable {
         // Requirements to move from open to booked is the guest total fulfilled & total amount met
         if (isGuestCapacityMet() && isTotalAmountPaid()) {
             currentState = States.BookedReservation;
+        }
+    }
+
+    // Booking Active/Finished are time based states, and can only be set if the current
+    // states are booked reservation or booking active
+    function checkIfBookingActiveOrFinished() internal {
+        if (currentState == States.BookedReservation || currentState == States.BookingActive) {
+            if (block.timestamp > arrivalTimestamp && block.timestamp < departureTimestamp) {
+                // Currently in the property
+                currentState = States.BookingActive;
+            } else if (block.timestamp > departureTimestamp) {
+                currentState = States.BookingFinished;
+            }
         }
     }
 
