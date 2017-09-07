@@ -119,6 +119,9 @@ contract Reservation is Ownable {
     // The cancel action is for the owner of the contract; only works in open/booked states
     // It will change the state to cancelled where all guests will be able to withdraw their ether
     function cancelReservation() onlyOwner {
+        // make sure to check that we can't cancel it when guests are in the property
+        checkIfBookingActiveOrFinished();
+
         require(currentState == States.OpenReservation || currentState == States.BookedReservation);
 
         currentState == States.CancelledReservation;
