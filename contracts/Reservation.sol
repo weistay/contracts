@@ -95,7 +95,9 @@ contract Reservation is Ownable {
     // However, if we reach the guest limit with this reservation, this contract needs to move to the Booked state.
     // When allowing a reservation we will need to check that they have paid the correct amount per guest
     function makeReservation() payable atCurrentState(States.OpenReservation) guestLimitNotReached {
-        // Each guest cannot pay more than the allocated amount
+        // Contracts are not allowed to enter
+        require(!isContract(msg.sender));
+		// Each guest cannot pay more than the allocated amount
         require(msg.value == amountPerGuest);
         // Whole contract not overpaid
         require(totalAmountPaid < reservationTotalAmount);
@@ -178,6 +180,12 @@ contract Reservation is Ownable {
 
     function isTotalAmountPaid() returns (bool) {
         return totalAmountPaid == reservationTotalAmount;
+    }
+    
+    function isContract(address addr) returns (bool) {
+      uint size;
+      assembly { size := extcodesize(addr) }
+      return size > 0;
     }
 
 }
