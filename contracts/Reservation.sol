@@ -58,9 +58,9 @@ contract Reservation is Ownable {
         require(_arrivalTimestamp > createdTimestamp);
         require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
         require(_refundableDamageDepositAmount >= 0 && _refundableDamageDepositAmount < _reservationTotalAmount);
-
         // Ensure that the total amount will not result in a higher amount than the total
         require(amountPerGuest > 0 && ( _reservationTotalAmount / _guestTotal) <= _reservationTotalAmount);
+
         amountPerGuest = _reservationTotalAmount / _guestTotal;
 
         nights = _nights;
