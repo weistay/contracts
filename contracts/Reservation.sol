@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.16;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
@@ -176,15 +176,15 @@ contract Reservation is Ownable {
         }
     }
 
-    function isGuestCapacityMet() constant returns (bool) {
+    function isGuestCapacityMet() view returns (bool) {
         return guestsCount == guestTotal;
     }
 
-    function isTotalAmountPaid() constant returns (bool) {
+    function isTotalAmountPaid() view returns (bool) {
         return totalAmountPaid == reservationTotalAmount;
     }
     
-    function isContract(address addr) constant returns (bool) {
+    function isContract(address addr) view returns (bool) {
         uint size;
         assembly { size := extcodesize(addr) }
         return size > 0;
