@@ -31,8 +31,17 @@ contract('Reservation', function (accounts) {
     var guest2 = accounts[2];
     var guest3 = accounts[3];
 
+    var oneDay = 86400;
+    var currentTimestamp = Math.floor(Date.now() / 1000);
+    var arrivalDate = currentTimestamp + (oneDay * 30);
+    var nights = 7;
+    var guestsTotal = 2;
+    var totalInWei = 1600000000;
+    var ddInWei = 200000000;
+    var expiryTimestamp = currentTimestamp + 120; // Expires in 2 minutes since we want to test expiry stuff too
+
     it('creates a contract', async function() {
-        instance = await Reservation.new(1564555780, 1, 2, 1600000000, 200000000);
+        instance = await Reservation.new(arrivalDate, nights, guestsTotal, totalInWei, ddInWei, expiryTimestamp);
     });
 
     it('makes sure the amount per guest is correct', async function() {

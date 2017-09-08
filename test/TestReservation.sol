@@ -7,7 +7,14 @@ import "../contracts/Reservation.sol";
 contract TestReservation {
 
     function testContractCreation() {
-        Reservation tReservation = new Reservation(1564555780, 1, 2, 1600000000, 200000000);
+        Reservation tReservation = new Reservation(
+            block.timestamp + 30 days,
+            7,
+            2,
+            1600000000,
+            200000000,
+            block.timestamp + 2 minutes
+        );
 
         Assert.equal(tReservation.amountPerGuest(), 800000000, "Each guest should pay 8 gwei");
     }

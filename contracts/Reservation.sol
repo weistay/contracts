@@ -32,8 +32,8 @@ contract Reservation is Ownable {
     uint public departureTimestamp;
     uint public createdTimestamp = block.timestamp;
 
-    // When the reservation shall expire (automatically go to cancelled state) 
-    uint public reservationExpiry;
+    // When the reservation shall expire if not booked
+    uint public expiryTimestamp;
 
     struct Guest {
         address guestAddress;
@@ -54,16 +54,23 @@ contract Reservation is Ownable {
         uint _nights,
         uint _guestTotal,
         uint _reservationTotalAmount,
-        uint _refundableDamageDepositAmount
+        uint _refundableDamageDepositAmount,
+        uint _expiryTimestamp
     ) {
         require(_nights > 0 && _nights < 30);
         require(_guestTotal > 0 && _guestTotal < 100);
+
         require(_arrivalTimestamp > createdTimestamp);
+        require(_expiryTimestamp > createdTimestamp && _expiryTimestamp < _arrivalTimestamp);
+
         require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
         require(_refundableDamageDepositAmount >= 0 && _refundableDamageDepositAmount < _reservationTotalAmount);
+
         // Ensure that the total amount will not result in a higher amount than the total
         amountPerGuest = _reservationTotalAmount / _guestTotal;
         require(amountPerGuest > 0 && amountPerGuest <= _reservationTotalAmount);
+
+        expiryTimestamp = _expiryTimestamp;
 
         nights = _nights;
         guestTotal = _guestTotal;
@@ -120,13 +127,15 @@ contract Reservation is Ownable {
 
     // The cancel action is for the owner of the contract; only works in open/booked states
     // It will change the state to cancelled where all guests will be able to withdraw their ether
+    // The only is only allowed to cancel a booked reservation if it is before the expiry time
     function cancelReservation() onlyOwner {
         // make sure to check that we can't cancel it when guests are in the property
         checkIfBookingActiveOrFinished();
 
         require(currentState == States.ReservationOpen || currentState == States.ReservationBooked);
+        require(isReservationExpired() == false); // Not past expiry or owner cannot cancel the booking
 
-        currentState == States.ReservationCancelled;
+        currentState = States.ReservationCancelled;
     }
 
     // Let guests withdraw their amount if the reservation is cancelled
@@ -163,6 +172,9 @@ contract Reservation is Ownable {
         // Requirements to move from open to booked is the guest total fulfilled & total amount met
         if (isGuestCapacityMet() && isTotalAmountPaid()) {
             currentState = States.ReservationBooked;
+        } else if (block.timestamp > expiryTimestamp) {
+            // Reservation conditions have not been met to convert to booked & now it must be cancelled
+            currentState = States.ReservationCancelled;
         }
     }
 
@@ -177,6 +189,10 @@ contract Reservation is Ownable {
                 currentState = States.BookingFinished;
             }
         }
+    }
+
+    function isReservationExpired() view returns (bool) {
+        return expiryTimestamp > block.timestamp;
     }
 
     function isGuestCapacityMet() view returns (bool) {
