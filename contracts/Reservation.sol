@@ -176,15 +176,15 @@ contract Reservation is Ownable {
         }
     }
 
-    function isGuestCapacityMet() view returns (bool) {
+    function isGuestCapacityMet() constant returns (bool) {
         return guestsCount == guestTotal;
     }
 
-    function isTotalAmountPaid() view returns (bool) {
+    function isTotalAmountPaid() constant returns (bool) {
         return totalAmountPaid == reservationTotalAmount;
     }
     
-    function isContract(address addr) view returns (bool) {
+    function isContract(address addr) constant returns (bool) {
         uint size;
         assembly { size := extcodesize(addr) }
         return size > 0;
