@@ -35,4 +35,4 @@ Right now we have the current 'states' of the reservation
  
 A reservation transforms into a booking when the guests have actually arrived at the property.
  
- 
+[logo]: https://github.com/weistay/contracts/raw/master/documents/reservation-flow.png "Reservation Flow"
