@@ -1,7 +1,5 @@
 var Reservation = artifacts.require("./Reservation.sol");
 
 module.exports = function(deployer) {
-  //deployer.deploy(ConvertLib);
-  //deployer.link(ConvertLib, MetaCoin);
-  deployer.deploy(Reservation);
+  //deployer.deploy(Reservation); // Do not deploy via this method as contract takes constructor params
 };
