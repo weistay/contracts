@@ -32,6 +32,9 @@ contract Reservation is Ownable {
     uint public departureTimestamp;
     uint public createdTimestamp = block.timestamp;
 
+    // When the reservation shall expire (automatically go to cancelled state)
+    uint public reservationExpiry;
+
     struct Guest {
         address guestAddress;
         uint amountPaid;
