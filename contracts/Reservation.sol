@@ -9,9 +9,9 @@ contract Reservation is Ownable {
     using SafeMath for uint256;
 
     enum States {
-        OpenReservation,
-        BookedReservation,
-        CancelledReservation,
+        ReservationOpen,
+        ReservationBooked,
+        ReservationCancelled,
         BookingActive,
         BookingFinished,
         BookingDisputed
@@ -32,7 +32,7 @@ contract Reservation is Ownable {
     uint public departureTimestamp;
     uint public createdTimestamp = block.timestamp;
 
-    // When the reservation shall expire (automatically go to cancelled state)
+    // When the reservation shall expire (automatically go to cancelled state) 
     uint public reservationExpiry;
 
     struct Guest {
@@ -47,7 +47,7 @@ contract Reservation is Ownable {
     mapping(address => Guest) public guests;
 
     // Start in open reservation state
-    States public currentState = States.OpenReservation;
+    States public currentState = States.ReservationOpen;
 
     function Reservation(
         uint _arrivalTimestamp,
@@ -93,10 +93,10 @@ contract Reservation is Ownable {
         revert();
     }
 
-    // Allow a reservation to be made if the contract is in OpenReservation state AND guest limit is not reached
+    // Allow a reservation to be made if the contract is in ReservationOpen state AND guest limit is not reached
     // However, if we reach the guest limit with this reservation, this contract needs to move to the Booked state.
     // When allowing a reservation we will need to check that they have paid the correct amount per guest
-    function makeReservation() payable atCurrentState(States.OpenReservation) guestLimitNotReached {
+    function makeReservation() payable atCurrentState(States.ReservationOpen) guestLimitNotReached {
         // Contracts are not allowed to enter
         require(!isContract(msg.sender));
 		// Each guest cannot pay more than the allocated amount
@@ -115,7 +115,7 @@ contract Reservation is Ownable {
         guests[msg.sender].exists = true;
 
         // We now need to check if this contract can move forward
-        performOpenReservationStateCheck();
+        performReservationOpenStateCheck();
     }
 
     // The cancel action is for the owner of the contract; only works in open/booked states
@@ -124,13 +124,13 @@ contract Reservation is Ownable {
         // make sure to check that we can't cancel it when guests are in the property
         checkIfBookingActiveOrFinished();
 
-        require(currentState == States.OpenReservation || currentState == States.BookedReservation);
+        require(currentState == States.ReservationOpen || currentState == States.ReservationBooked);
 
-        currentState == States.CancelledReservation;
+        currentState == States.ReservationCancelled;
     }
 
     // Let guests withdraw their amount if the reservation is cancelled
-    function withdrawPaidAmount() external atCurrentState(States.CancelledReservation) {
+    function withdrawPaidAmount() external atCurrentState(States.ReservationCancelled) {
         // Make sure this sender exists
         require(guests[msg.sender].exists);
         require(guests[msg.sender].refunded == false);
@@ -155,21 +155,21 @@ contract Reservation is Ownable {
         selfdestruct(_recipient);
     }
 
-    function performOpenReservationStateCheck() internal {
-        if (currentState != States.OpenReservation) {
+    function performReservationOpenStateCheck() internal {
+        if (currentState != States.ReservationOpen) {
             return;
         }
 
         // Requirements to move from open to booked is the guest total fulfilled & total amount met
         if (isGuestCapacityMet() && isTotalAmountPaid()) {
-            currentState = States.BookedReservation;
+            currentState = States.ReservationBooked;
         }
     }
 
     // Booking Active/Finished are time based states, and can only be set if the current
     // states are booked reservation or booking active
     function checkIfBookingActiveOrFinished() internal {
-        if (currentState == States.BookedReservation || currentState == States.BookingActive) {
+        if (currentState == States.ReservationBooked || currentState == States.BookingActive) {
             if (block.timestamp > arrivalTimestamp && block.timestamp < departureTimestamp) {
                 // Currently in the property
                 currentState = States.BookingActive;

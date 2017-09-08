@@ -15,7 +15,7 @@ Generally the flow is as follows:
 
 These simple steps do leave a lot of edge cases, in the initial weistay version there will be no concept of deposit/balances only the total amount that is required.
 
-### Splitting up the payments
+### Splitting up the payments
 
 Since the weistay idea is about sharing a property with like-minded individuals who at-least some of them should be strangers, the full payment for the property needs to be split up into multiple payments.
 
@@ -23,11 +23,16 @@ Depending on the property, the payment may be fixed per person so any number of 
 
 ### Stages in the contract
 
-As a rough concept I imagine there to be a few stages outlined below
+Right now we have the current 'states' of the reservation
 
-1. Reservation Period - this is where the guests send their ether to a reservation on a property eg 21 aug 2018 -> 28 aug 2018
-2. Closing period - after a certain period of time if the contract is not paid before then, then the reservation has failed. During the reservation time and this time guests can withdraw their ether.
-3. Locked In Period - when the arrival date nears, the guests will no longer be able to withdraw their ether and have committed to this reservation.
-4. Arrival Period - guest arrivals, not much will happen in the contract here
-5. After departure period - part of the guests payment will include a damage deposit, this will be made available for refund once the controller of the contract has allowed it. This will not be the owner but an intermiedatry for fairness.
-    - The owner can also now withdraw their eth that they are owed 
+ - Reservation Open
+ - Reservation Booked
+ - Reservation Cancelled
+ 
+ - Booking Active
+ - Booking Finished
+ - Booking Disputed
+ 
+A reservation transforms into a booking when the guests have actually arrived at the property.
+ 
+ 
