@@ -192,7 +192,7 @@ contract Reservation is Ownable {
     }
 
     function isReservationExpired() view returns (bool) {
-        return expiryTimestamp > block.timestamp;
+        return block.timestamp > expiryTimestamp;
     }
 
     function isGuestCapacityMet() view returns (bool) {
