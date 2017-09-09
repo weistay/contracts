@@ -4,7 +4,7 @@ const Reservation = artifacts.require('./Reservation.sol');
 
 var expectThrow = require('./helpers/expectThrow');
 
-contract('Reservation', function (accounts) {
+contract('reservation booked and then cancelled', function (accounts) {
     var instance;
 
     var owner = accounts[0];
@@ -19,7 +19,7 @@ contract('Reservation', function (accounts) {
     var guestsTotal = 2;
     var totalInWei = 1600000000;
     var ddInWei = 200000000;
-    var expiryTimestamp = currentTimestamp + 120; // Expires in 2 minutes since we want to test expiry stuff too
+    var expiryTimestamp = currentTimestamp + 180;
 
     it('creates a contract', async function() {
         instance = await Reservation.new(arrivalDate, nights, guestsTotal, totalInWei, ddInWei, expiryTimestamp);
@@ -40,6 +40,10 @@ contract('Reservation', function (accounts) {
         await expectThrow(instance.withdrawPaidAmount({from: guest1}));
     });
 
+    it('will not accept an invalid wei amount', async function() {
+        await expectThrow(instance.makeReservation({value: web3.toWei(801, 'mwei'), from: guest2}));
+    });
+
     it('makes a second reservation', async function() {
         await instance.makeReservation({value: web3.toWei(800, 'mwei'), from: guest2});
         var guestCount = await instance.guestsCount();
@@ -58,6 +62,21 @@ contract('Reservation', function (accounts) {
 
         var currentState = await instance.currentState();
         assert.equal(currentState.toString(), 1); // 1 is reservation booked
+    });
+
+    it('guest cannot cancel the reservation', async function() {
+        await expectThrow(instance.cancelReservation({from: guest1}));
+    });
+
+    it('owner cancels reservation', async function() {
+        await instance.cancelReservation({from: owner});
+
+        var currentState = await instance.currentState();
+        assert.equal(currentState.toString(), 2); // 2 is reservation cancelled
+    });
+
+    it('guest can withdraw the amount that they put in', async function() {
+        await instance.withdrawPaidAmount({from: guest1});
     });
 
 });
