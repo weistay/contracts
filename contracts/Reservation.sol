@@ -128,7 +128,7 @@ contract Reservation is Ownable {
     // The cancel action is for the owner of the contract; only works in open/booked states
     // It will change the state to cancelled where all guests will be able to withdraw their ether
     // The only is only allowed to cancel a booked reservation if it is before the expiry time
-    function cancelReservation() onlyOwner {
+    function cancelReservation() external onlyOwner {
         // make sure to check that we can't cancel it when guests are in the property
         checkIfBookingActiveOrFinished();
 
