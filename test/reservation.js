@@ -18,11 +18,10 @@ contract('reservation booked and then cancelled', function (accounts) {
     var nights = 7;
     var guestsTotal = 2;
     var totalInWei = 1600000000;
-    var ddInWei = 200000000;
     var expiryTimestamp = currentTimestamp + 180;
 
     it('creates a contract', async function() {
-        instance = await Reservation.new(arrivalDate, nights, guestsTotal, totalInWei, ddInWei, expiryTimestamp);
+        instance = await Reservation.new(arrivalDate, nights, guestsTotal, totalInWei, expiryTimestamp);
     });
 
     it('makes sure the amount per guest is correct', async function() {

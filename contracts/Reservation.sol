@@ -25,7 +25,6 @@ contract Reservation is Ownable {
     uint public totalAmountPaid;
     uint public totalAmountRefunded;
     uint public reservationTotalAmount;
-    uint public refundableDamageDepositAmount;
 
     uint public nights;
     uint public arrivalTimestamp;
@@ -54,7 +53,6 @@ contract Reservation is Ownable {
         uint _nights,
         uint _guestTotal,
         uint _reservationTotalAmount,
-        uint _refundableDamageDepositAmount,
         uint _expiryTimestamp
     ) {
         require(_nights > 0 && _nights < 30);
@@ -64,7 +62,6 @@ contract Reservation is Ownable {
         require(_expiryTimestamp > createdTimestamp && _expiryTimestamp < _arrivalTimestamp);
 
         require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
-        require(_refundableDamageDepositAmount >= 0 && _refundableDamageDepositAmount < _reservationTotalAmount);
 
         // Ensure that the total amount will not result in a higher amount than the total
         amountPerGuest = _reservationTotalAmount / _guestTotal;
@@ -79,7 +76,6 @@ contract Reservation is Ownable {
         departureTimestamp = _arrivalTimestamp + (_nights * 86400);
 
         reservationTotalAmount = _reservationTotalAmount;
-        refundableDamageDepositAmount = _refundableDamageDepositAmount;
     }
 
     modifier atCurrentState(States _currentState) {

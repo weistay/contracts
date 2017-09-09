@@ -12,7 +12,6 @@ contract TestReservation {
             7,
             2,
             1600000000,
-            200000000,
             block.timestamp + 2 minutes
         );
 
