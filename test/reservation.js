@@ -2,26 +2,7 @@
 
 const Reservation = artifacts.require('./Reservation.sol');
 
-var expectThrow = async function(promise) {
-    try {
-        await promise;
-    } catch (error) {
-        // TODO: Check jump destination to destinguish between a throw
-        //       and an actual invalid jump.
-        const invalidOpcode = error.message.search('invalid opcode') >= 0;
-        // TODO: When we contract A calls contract B, and B throws, instead
-        //       of an 'invalid jump', we get an 'out of gas' error. How do
-        //       we distinguish this from an actual out of gas event? (The
-        //       testrpc log actually show an 'invalid jump' event.)
-        const outOfGas = error.message.search('out of gas') >= 0;
-        assert(
-            invalidOpcode || outOfGas,
-            "Expected throw, got '" + error + "' instead",
-        );
-        return;
-    }
-    assert.fail('Expected throw not received');
-};
+var expectThrow = require('./helpers/expectThrow');
 
 contract('Reservation', function (accounts) {
     var instance;
@@ -55,6 +36,10 @@ contract('Reservation', function (accounts) {
         assert.equal(guestCount.toString(), 1);
     });
 
+    it('guest cannot withdraw an amount whilst reversion open', async function() {
+        await expectThrow(instance.withdrawPaidAmount({from: guest1}));
+    });
+
     it('makes a second reservation', async function() {
         await instance.makeReservation({value: web3.toWei(800, 'mwei'), from: guest2});
         var guestCount = await instance.guestsCount();
@@ -65,5 +50,14 @@ contract('Reservation', function (accounts) {
         await expectThrow(instance.makeReservation({value: web3.toWei(800, 'mwei'), from: guest3}));
     });
 
+    it('is fully paid and has progressed to reservation booked', async function() {
+        var totalAmountPaid = await instance.totalAmountPaid();
+        var reservationTotalAmount = await instance.reservationTotalAmount();
+
+        assert.equal(totalAmountPaid.toString(), reservationTotalAmount.toString());
+
+        var currentState = await instance.currentState();
+        assert.equal(currentState.toString(), 1); // 1 is reservation booked
+    });
 
 });
