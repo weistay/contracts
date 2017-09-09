@@ -77,6 +77,16 @@ contract('reservation booked and then cancelled', function (accounts) {
 
     it('guest can withdraw the amount that they put in', async function() {
         await instance.withdrawPaidAmount({from: guest1});
+
+        var remainingBalance = await instance.getBalance();
+        assert.equal(remainingBalance.toString(), web3.toWei(800, 'mwei'));
+
+        await instance.withdrawPaidAmount({from: guest2});
+    });
+
+    it('reservation contract should have 0 balance', async function() {
+        var remainingBalance = await instance.getBalance();
+        assert.equal(remainingBalance.toString(), 0);
     });
 
 });

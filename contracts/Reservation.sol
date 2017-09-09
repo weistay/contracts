@@ -100,6 +100,11 @@ contract Reservation is Ownable {
         revert();
     }
 
+    // Can be called to update the contracts state if so desired
+    function ping() external {
+        checkIfBookingActiveOrFinished();
+    }
+
     // Allow a reservation to be made if the contract is in ReservationOpen state AND guest limit is not reached
     // However, if we reach the guest limit with this reservation, this contract needs to move to the Booked state.
     // When allowing a reservation we will need to check that they have paid the correct amount per guest
@@ -207,6 +212,10 @@ contract Reservation is Ownable {
         uint size;
         assembly { size := extcodesize(addr) }
         return size > 0;
+    }
+
+    function getBalance() view returns (uint) {
+        return this.balance;
     }
 
 }
