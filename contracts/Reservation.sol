@@ -13,7 +13,7 @@ contract Reservation is Ownable {
         ReservationBooked,
         ReservationCancelled,
         BookingActive,
-        BookingFinished,
+        BookingCompleted,
         BookingDisputed
     }
 
@@ -79,7 +79,7 @@ contract Reservation is Ownable {
     }
 
     modifier atCurrentState(States _currentState) {
-        checkIfBookingActiveOrFinished();
+        checkIfBookingActive();
 
         require(currentState == _currentState);
         _;
@@ -98,7 +98,7 @@ contract Reservation is Ownable {
 
     // Can be called to update the contracts state if so desired
     function ping() external {
-        checkIfBookingActiveOrFinished();
+        checkIfBookingActive();
     }
 
     // Allow a reservation to be made if the contract is in ReservationOpen state AND guest limit is not reached
@@ -131,7 +131,7 @@ contract Reservation is Ownable {
     // The only is only allowed to cancel a booked reservation if it is before the expiry time
     function cancelReservation() external onlyOwner {
         // make sure to check that we can't cancel it when guests are in the property
-        checkIfBookingActiveOrFinished();
+        checkIfBookingActive();
 
         require(currentState == States.ReservationOpen || currentState == States.ReservationBooked);
         require(isReservationExpired() == false); // Not past expiry or owner cannot cancel the booking
@@ -157,6 +157,10 @@ contract Reservation is Ownable {
         }
     }
 
+    function ownerWithdrawAmountOwed() external onlyOwner atCurrentState(States.BookingCompleted) {
+
+    }
+
     function destroy() onlyOwner {
         selfdestruct(owner);
     }
@@ -179,15 +183,11 @@ contract Reservation is Ownable {
         }
     }
 
-    // Booking Active/Finished are time based states, and can only be set if the current
-    // states are booked reservation or booking active
-    function checkIfBookingActiveOrFinished() internal {
-        if (currentState == States.ReservationBooked || currentState == States.BookingActive) {
-            if (block.timestamp > arrivalTimestamp && block.timestamp < departureTimestamp) {
-                // Currently in the property
+    // Booking Active is progressed to automatically
+    function checkIfBookingActive() internal {
+        if (currentState == States.ReservationBooked) {
+            if (block.timestamp > arrivalTimestamp) {
                 currentState = States.BookingActive;
-            } else if (block.timestamp > departureTimestamp) {
-                currentState = States.BookingFinished;
             }
         }
     }
