@@ -4,7 +4,7 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract Reservation is Ownable {
+contract GroupReservation is Ownable {
 
     using SafeMath for uint256;
 
@@ -13,26 +13,26 @@ contract Reservation is Ownable {
         ReservationBooked,
         ReservationCancelled,
         BookingActive,
-        BookingCompleted,
-        BookingDisputed
+        BookingFinished,
+        BookingCompleted
     }
 
-    uint public guestTotal;
-
-    // Calculated on Constructor
-    uint public amountPerGuest;
+    uint public costPerGuest;
+    uint public guestCountTotal = 0;
+    uint public guestCountMinimum = 0;
 
     uint public totalAmountPaid;
     uint public totalAmountRefunded;
+
     uint public reservationTotalAmount;
+    uint public reservationMinimumAmount;
 
     uint public nights;
+    uint public expiryTimestamp;
     uint public arrivalTimestamp;
     uint public departureTimestamp;
-    uint public createdTimestamp = block.timestamp;
 
-    // When the reservation shall expire if not booked
-    uint public expiryTimestamp;
+    uint public createdTimestamp = block.timestamp;
 
     struct Guest {
         address guestAddress;
@@ -42,52 +42,53 @@ contract Reservation is Ownable {
         bool refunded;
     }
 
-    uint public guestsCount = 0;
-    mapping(address => Guest) public guests;
+    uint public currentGuestCount = 0;
+
+    mapping(address => Guest) public currentGuests;
 
     // Start in open reservation state
     States public currentState = States.ReservationOpen;
 
-    function Reservation(
+    function GroupReservation(
         uint _arrivalTimestamp,
         uint _nights,
-        uint _guestTotal,
-        uint _reservationTotalAmount,
+        uint _costPerGuest,
+        uint _guestCountTotal,
+        uint _guestCountMinimum,
         uint _expiryTimestamp
     ) {
         require(_nights > 0 && _nights < 30);
-        require(_guestTotal > 0 && _guestTotal < 100);
+        require(_guestCountMinimum <= _guestCountTotal);
+        require(_guestCountTotal > 0 && _guestCountTotal < 100);
 
         require(_arrivalTimestamp > createdTimestamp);
         require(_expiryTimestamp > createdTimestamp && _expiryTimestamp < _arrivalTimestamp);
 
-        require(_reservationTotalAmount > 0 && _reservationTotalAmount < 100 ether);
-
-        // Ensure that the total amount will not result in a higher amount than the total
-        amountPerGuest = _reservationTotalAmount / _guestTotal;
-        require(amountPerGuest > 0 && amountPerGuest <= _reservationTotalAmount);
-
-        expiryTimestamp = _expiryTimestamp;
+        require(_costPerGuest > 0 && _costPerGuest < 100 ether);
 
         nights = _nights;
-        guestTotal = _guestTotal;
+        costPerGuest = _costPerGuest;
+        expiryTimestamp = _expiryTimestamp;
 
         arrivalTimestamp = _arrivalTimestamp;
         departureTimestamp = _arrivalTimestamp + (_nights * 86400);
 
-        reservationTotalAmount = _reservationTotalAmount;
+        guestCountTotal = _guestCountTotal;
+        guestCountMinimum = _guestCountMinimum;
+
+        reservationTotalAmount = _costPerGuest * _guestCountTotal;
+        reservationMinimumAmount = _costPerGuest * _guestCountMinimum;
     }
 
     modifier atCurrentState(States _currentState) {
-        checkIfBookingActive();
+        checkIfBookingActiveOrFinished();
 
         require(currentState == _currentState);
         _;
     }
 
-    // Requires guest slots to be open
     modifier guestLimitNotReached() {
-        require(guestsCount < guestTotal);
+        require(currentGuestCount < guestCountTotal);
         _;
     }
 
@@ -98,7 +99,12 @@ contract Reservation is Ownable {
 
     // Can be called to update the contracts state if so desired
     function ping() external {
-        checkIfBookingActive();
+        internalPing();
+    }
+
+    function internalPing() internal {
+        performReservationOpenStateCheck();
+        checkIfBookingActiveOrFinished();
     }
 
     // Allow a reservation to be made if the contract is in ReservationOpen state AND guest limit is not reached
@@ -107,20 +113,18 @@ contract Reservation is Ownable {
     function makeReservation() payable atCurrentState(States.ReservationOpen) guestLimitNotReached {
         // Contracts are not allowed to enter
         require(!isContract(msg.sender));
-		// Each guest cannot pay more than the allocated amount
-        require(msg.value == amountPerGuest);
-        // Whole contract not overpaid
-        require(totalAmountPaid < reservationTotalAmount);
+		// Each guest has to pay the exact amount or reject
+        require(msg.value == costPerGuest);
         // Make sure guest has not already paid, use false check as its more clear
-        require(guests[msg.sender].exists == false);
+        require(currentGuests[msg.sender].exists == false);
 
-        guestsCount ++;
+        currentGuestCount ++;
         totalAmountPaid = totalAmountPaid + msg.value;
 
-        guests[msg.sender].guestAddress = msg.sender;
-        guests[msg.sender].amountPaid = msg.value;
-        guests[msg.sender].paidTimestamp = block.timestamp;
-        guests[msg.sender].exists = true;
+        currentGuests[msg.sender].guestAddress = msg.sender;
+        currentGuests[msg.sender].amountPaid = msg.value;
+        currentGuests[msg.sender].paidTimestamp = block.timestamp;
+        currentGuests[msg.sender].exists = true;
 
         // We now need to check if this contract can move forward
         performReservationOpenStateCheck();
@@ -131,10 +135,9 @@ contract Reservation is Ownable {
     // The only is only allowed to cancel a booked reservation if it is before the expiry time
     function cancelReservation() external onlyOwner {
         // make sure to check that we can't cancel it when guests are in the property
-        checkIfBookingActive();
+        internalPing();
 
-        require(currentState == States.ReservationOpen || currentState == States.ReservationBooked);
-        require(isReservationExpired() == false); // Not past expiry or owner cannot cancel the booking
+        require(canCancelReservation());
 
         currentState = States.ReservationCancelled;
     }
@@ -142,23 +145,34 @@ contract Reservation is Ownable {
     // Let guests withdraw their amount if the reservation is cancelled
     function withdrawPaidAmount() external atCurrentState(States.ReservationCancelled) {
         // Make sure this sender exists
-        require(guests[msg.sender].exists);
-        require(guests[msg.sender].refunded == false);
+        require(currentGuests[msg.sender].exists);
+        require(currentGuests[msg.sender].refunded == false);
 
         // Set refunded to true now before we send
-        guests[msg.sender].refunded = true;
-        uint refundAmount = guests[msg.sender].amountPaid;
+        currentGuests[msg.sender].refunded = true;
+        uint refundAmount = currentGuests[msg.sender].amountPaid;
         totalAmountRefunded = totalAmountRefunded + refundAmount;
 
         if (!msg.sender.send(refundAmount)) {
             // If the send failed then reset now
-            guests[msg.sender].refunded = false;
+            currentGuests[msg.sender].refunded = false;
             totalAmountRefunded = totalAmountRefunded - refundAmount;
         }
     }
 
-    function ownerWithdrawAmountOwed() external onlyOwner atCurrentState(States.BookingCompleted) {
+    function ownerWithdrawAmountOwed() external onlyOwner {
+        // Make sure the state is correct
+        internalPing();
 
+        require(canOwnerWithdrawAmountOwed());
+
+        // Now we shall set the state to complete as the owner has withdrawn their balance
+        currentState = States.BookingCompleted;
+
+        if (!msg.sender.send(this.balance)) {
+            // Revert
+            currentState = States.BookingFinished;
+        }
     }
 
     function destroy() onlyOwner {
@@ -175,33 +189,60 @@ contract Reservation is Ownable {
         }
 
         // Requirements to move from open to booked is the guest total fulfilled & total amount met
-        if (isGuestCapacityMet() && isTotalAmountPaid()) {
+        if (isGuestCountTotalMet()) {
             currentState = States.ReservationBooked;
-        } else if (block.timestamp > expiryTimestamp) {
+        } else if (isReservationExpired() && isGuestCountMinimumMet()) {
+            // Here we need to check if the reservation expires BUT with the minimum required amount,
+            // which will turn the state to reservation booked
+            currentState = States.ReservationCancelled;
+        } else if (isReservationExpired()) {
             // Reservation conditions have not been met to convert to booked & now it must be cancelled
             currentState = States.ReservationCancelled;
         }
     }
 
     // Booking Active is progressed to automatically
-    function checkIfBookingActive() internal {
+    function checkIfBookingActiveOrFinished() internal {
         if (currentState == States.ReservationBooked) {
             if (block.timestamp > arrivalTimestamp) {
                 currentState = States.BookingActive;
             }
         }
+
+        // Check if finished from both states as active could have been skipped, then check if the
+        // guests have left as that will leave it in a finished state
+        if (
+            (
+                currentState == States.ReservationBooked ||
+                currentState == States.BookingActive
+            ) &&
+            block.timestamp > departureTimestamp
+        ) {
+            currentState = States.BookingFinished;
+        }
+    }
+
+    function canCancelReservation() view returns (bool) {
+        return
+            (currentState == States.ReservationOpen || currentState == States.ReservationBooked) &&
+            isReservationExpired() == false // Not past expiry or owner cannot cancel the booking
+        ;
+    }
+
+    function canOwnerWithdrawAmountOwed() view returns (bool) {
+        require(currentState == States.BookingFinished);
     }
 
     function isReservationExpired() view returns (bool) {
         return block.timestamp > expiryTimestamp;
     }
 
-    function isGuestCapacityMet() view returns (bool) {
-        return guestsCount == guestTotal;
+    function isGuestCountTotalMet() view returns (bool) {
+        return currentGuestCount == guestCountTotal;
     }
 
-    function isTotalAmountPaid() view returns (bool) {
-        return totalAmountPaid == reservationTotalAmount;
+    function isGuestCountMinimumMet() view returns (bool) {
+        return currentGuestCount <= guestCountMinimum;
     }
     
     function isContract(address addr) view returns (bool) {

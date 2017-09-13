@@ -1,10 +1,11 @@
 'use strict';
 
-const Reservation = artifacts.require('./Reservation.sol');
+const GroupReservation = artifacts.require('./GroupReservation.sol');
 
 var expectThrow = require('./helpers/expectThrow');
+var increaseTime = require('./helpers/increaseTime');
 
-contract('reservation booked and then cancelled', function (accounts) {
+contract('group reservation booked and then cancelled', function (accounts) {
     var instance;
 
     var owner = accounts[0];
@@ -17,21 +18,22 @@ contract('reservation booked and then cancelled', function (accounts) {
     var arrivalDate = currentTimestamp + (oneDay * 30);
     var nights = 7;
     var guestsTotal = 2;
-    var totalInWei = 1600000000;
+    var guestsMinimum = 1;
+    var costPerGuest = 800000000;
     var expiryTimestamp = currentTimestamp + 180;
 
     it('creates a contract', async function() {
-        instance = await Reservation.new(arrivalDate, nights, guestsTotal, totalInWei, expiryTimestamp);
+        instance = await GroupReservation.new(arrivalDate, nights, costPerGuest, guestsTotal, guestsMinimum, expiryTimestamp);
     });
 
     it('makes sure the amount per guest is correct', async function() {
-        var fee = await instance.amountPerGuest();
+        var fee = await instance.costPerGuest();
         assert.equal(fee.toString(), web3.toWei(800, 'mwei'));
     });
 
     it('makes first reservation', async function() {
         await instance.makeReservation({value: web3.toWei(800, 'mwei'), from: guest1});
-        var guestCount = await instance.guestsCount();
+        var guestCount = await instance.currentGuestCount();
         assert.equal(guestCount.toString(), 1);
     });
 
@@ -45,7 +47,7 @@ contract('reservation booked and then cancelled', function (accounts) {
 
     it('makes a second reservation', async function() {
         await instance.makeReservation({value: web3.toWei(800, 'mwei'), from: guest2});
-        var guestCount = await instance.guestsCount();
+        var guestCount = await instance.currentGuestCount();
         assert.equal(guestCount.toString(), 2);
     });
 
@@ -89,3 +91,61 @@ contract('reservation booked and then cancelled', function (accounts) {
     });
 
 });
+
+/*
+
+contract('group reservation booked and completed', function (accounts) {
+    var instance2;
+
+    var owner = accounts[0];
+    var guest1 = accounts[1];
+    var guest2 = accounts[2];
+    var guest3 = accounts[3];
+
+    var oneDay = 86400;
+    var currentTimestamp = Math.floor(Date.now() / 1000);
+    var arrivalDate = currentTimestamp + (oneDay * 30);
+    var nights = 7;
+    var guestsTotal = 2;
+    var guestsMinimum = 1;
+    var costPerGuest = 800000000;
+    var expiryTimestamp = currentTimestamp + 180;
+
+    it('creates a contract', async function() {
+        instance2 = await GroupReservation.new(arrivalDate, nights, costPerGuest, guestsTotal, guestsMinimum, expiryTimestamp);
+    });
+
+    it('makes first reservation', async function() {
+        await instance2.makeReservation({value: costPerGuest, from: guest1});
+        var guestCount = await instance2.currentGuestCount();
+        assert.equal(guestCount.toString(), 1);
+    });
+
+    it('makes a second reservation', async function() {
+        await instance2.makeReservation({value: costPerGuest, from: guest2});
+        var guestCount = await instance2.currentGuestCount();
+        assert.equal(guestCount.toString(), 2);
+    });
+
+    it('is fully paid and has progressed to reservation booked', async function() {
+        var totalAmountPaid = await instance2.totalAmountPaid();
+        var reservationTotalAmount = await instance2.reservationTotalAmount();
+
+        assert.equal(totalAmountPaid.toString(), reservationTotalAmount.toString());
+
+        var currentState = await instance2.currentState();
+        assert.equal(currentState.toString(), 1); // 1 is reservation booked
+    });
+
+    it('the contract will advance to the active state', async function() {
+        increaseTime.increaseTimeTestRPC(increaseTime.duration.minutes(3));
+        await instance2.ping();
+        var currentState = await instance2.currentState();
+        assert.equal(currentState.toString(), 2);
+    });
+
+});
+*/
+
+
+
