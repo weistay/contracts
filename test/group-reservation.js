@@ -92,7 +92,7 @@ contract('group reservation booked and then cancelled', function (accounts) {
 
 });
 
-/*
+
 
 contract('group reservation booked and completed', function (accounts) {
     var instance2;
@@ -104,7 +104,7 @@ contract('group reservation booked and completed', function (accounts) {
 
     var oneDay = 86400;
     var currentTimestamp = Math.floor(Date.now() / 1000);
-    var arrivalDate = currentTimestamp + (oneDay * 30);
+    var arrivalDate = currentTimestamp + oneDay;
     var nights = 7;
     var guestsTotal = 2;
     var guestsMinimum = 1;
@@ -137,15 +137,15 @@ contract('group reservation booked and completed', function (accounts) {
         assert.equal(currentState.toString(), 1); // 1 is reservation booked
     });
 
-    it('the contract will advance to the active state', async function() {
-        increaseTime.increaseTimeTestRPC(increaseTime.duration.minutes(3));
+    /*it('the contract will advance to the active state', async function() {
+        increaseTime.increaseTimeTestRPC(increaseTime.duration.days(2));
         await instance2.ping();
         var currentState = await instance2.currentState();
         assert.equal(currentState.toString(), 2);
     });
-
-});
 */
+});
+
 
 
 
