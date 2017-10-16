@@ -1,0 +1,475 @@
+{
+  "contract_name": "GroupReservation",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "cancelReservation",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentState",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "createdTimestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getBalance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "isContract",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "makeReservation",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isGuestCountMinimumMet",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalAmountRefunded",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "reservationTotalAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "withdrawPaidAmount",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "reservationMinimumAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "canOwnerWithdrawAmountOwed",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "ping",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "guestCountMinimum",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "destroy",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "guestCountTotal",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isReservationExpired",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "arrivalTimestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "expiryTimestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "canCancelReservation",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "ownerWithdrawAmountOwed",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "departureTimestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isGuestCountTotalMet",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentGuestCount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "costPerGuest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "currentGuests",
+      "outputs": [
+        {
+          "name": "guestAddress",
+          "type": "address"
+        },
+        {
+          "name": "amountPaid",
+          "type": "uint256"
+        },
+        {
+          "name": "paidTimestamp",
+          "type": "uint256"
+        },
+        {
+          "name": "exists",
+          "type": "bool"
+        },
+        {
+          "name": "refunded",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "nights",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalAmountPaid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "destroyAndSend",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_arrivalTimestamp",
+          "type": "uint256"
+        },
+        {
+          "name": "_nights",
+          "type": "uint256"
+        },
+        {
+          "name": "_costPerGuest",
+          "type": "uint256"
+        },
+        {
+          "name": "_guestCountTotal",
+          "type": "uint256"
+        },
+        {
+          "name": "_guestCountMinimum",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiryTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    }
+  ],
+  "unlinked_binary": "0x606060405260006002819055600381905542600c55600d819055600f805460ff19166001835b0217905550341561003557600080fd5b60405160c080610e028339810160405280805191906020018051919060200180519190602001805191906020018051919060200180519150505b5b60008054600160a060020a03191633600160a060020a03161790555b60008511801561009c5750601e85105b15156100a757600080fd5b828211156100b457600080fd5b6000831180156100c45750606483105b15156100cf57600080fd5b600c5486116100dd57600080fd5b600c54811180156100ed57508581105b15156100f857600080fd5b600084118015610110575068056bc75e2d6310000084105b151561011b57600080fd5b600885905560018490556009819055600a8690556201518085028601600b55600283905560038290558284026006558184026007555b5050505050505b610c9b806101676000396000f300606060405236156101885763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166303cedaa681146101905780630c3f6acf146101a557806310309781146101dc57806312065fe01461020157806316279055146102265780631876e8d11461025957806321ccfeae14610263578063264938481461028a57806329dd30b0146102af578063480fbca1146102d45780634f39ab5e146102e95780635a0be7971461030e5780635c36b186146103355780637d7d4e701461034a57806383197ef01461036f5780638d4f73db146103845780638da5cb5b146103a9578063925945f8146103d8578063a2381441146103ff578063ade6e2aa14610424578063c2a8ad7a14610449578063c92d411c14610470578063d054f0ee14610485578063dc89591d146104aa578063e73eaafd146104d1578063ea1ab4cb146104f6578063edeac7341461051b578063f2c9ce2614610577578063f2fde38b1461059c578063f41cb5d1146105bd578063f5074f41146105e2575b5b600080fd5b005b341561019b57600080fd5b61018e610603565b005b34156101b057600080fd5b6101b8610652565b604051808260058111156101c857fe5b60ff16815260200191505060405180910390f35b34156101e757600080fd5b6101ef61065b565b60405190815260200160405180910390f35b341561020c57600080fd5b6101ef610661565b60405190815260200160405180910390f35b341561023157600080fd5b610245600160a060020a0360043516610670565b604051901515815260200160405180910390f35b61018e61067f565b005b341561026e57600080fd5b610245610780565b604051901515815260200160405180910390f35b341561029557600080fd5b6101ef61078c565b60405190815260200160405180910390f35b34156102ba57600080fd5b6101ef610792565b60405190815260200160405180910390f35b34156102df57600080fd5b61018e610798565b005b34156102f457600080fd5b6101ef6108b2565b60405190815260200160405180910390f35b341561031957600080fd5b6102456108b8565b604051901515815260200160405180910390f35b341561034057600080fd5b61018e6108dc565b005b341561035557600080fd5b6101ef6108e7565b60405190815260200160405180910390f35b341561037a57600080fd5b61018e6108ed565b005b341561038f57600080fd5b6101ef610919565b60405190815260200160405180910390f35b34156103b457600080fd5b6103bc61091f565b604051600160a060020a03909116815260200160405180910390f35b34156103e357600080fd5b61024561092e565b604051901515815260200160405180910390f35b341561040a57600080fd5b6101ef610937565b60405190815260200160405180910390f35b341561042f57600080fd5b6101ef61093d565b60405190815260200160405180910390f35b341561045457600080fd5b610245610943565b604051901515815260200160405180910390f35b341561047b57600080fd5b61018e61098c565b005b341561049057600080fd5b6101ef610a2d565b60405190815260200160405180910390f35b34156104b557600080fd5b610245610a33565b604051901515815260200160405180910390f35b34156104dc57600080fd5b6101ef610a3e565b60405190815260200160405180910390f35b341561050157600080fd5b6101ef610a44565b60405190815260200160405180910390f35b341561052657600080fd5b61053a600160a060020a0360043516610a4a565b604051600160a060020a039095168552602085019390935260408085019290925215156060840152901515608083015260a0909101905180910390f35b341561058257600080fd5b6101ef610a87565b60405190815260200160405180910390f35b34156105a757600080fd5b61018e600160a060020a0360043516610a8d565b005b34156105c857600080fd5b6101ef610ae5565b60405190815260200160405180910390f35b34156105ed57600080fd5b61018e600160a060020a0360043516610aeb565b005b60005433600160a060020a0390811691161461061e57600080fd5b610626610b16565b61062e610943565b151561063957600080fd5b600f80546002919060ff19166001835b02179055505b5b565b600f5460ff1681565b600c5481565b600160a060020a033016315b90565b6000813b908111905b50919050565b6000610689610b29565b80600581111561069557fe5b600f5460ff1660058111156106a657fe5b146106b057600080fd5b600254600d54106106c057600080fd5b6106c933610670565b156106d357600080fd5b60015434146106e157600080fd5b600160a060020a0333166000908152600e602052604090206003015460ff161561070a57600080fd5b600d805460019081019091556004805434908101909155600160a060020a0333166000818152600e60205260409020805473ffffffffffffffffffffffffffffffffffffffff1916909117815580830191909155426002820155600301805460ff1916909117905561077a610bc4565b5b5b5b50565b600354600d5411155b90565b60055481565b60065481565b600060026107a4610b29565b8060058111156107b057fe5b600f5460ff1660058111156107c157fe5b146107cb57600080fd5b600160a060020a0333166000908152600e602052604090206003015460ff1615156107f557600080fd5b33600160a060020a03166000908152600e6020526040902060030154610100900460ff161561082357600080fd5b600160a060020a0333166000818152600e60205260409081902060038101805461ff001916610100179055600101546005805482019055935083156108fc0290849051600060405180830381858888f1935050505015156108ac57600160a060020a0333166000908152600e60205260409020600301805461ff00191690556005805483900390555b5b5b5050565b60075481565b600060045b600f5460ff1660058111156108ce57fe5b1461066d57600080fd5b5b90565b61064f610b16565b5b565b60035481565b60005433600160a060020a0390811691161461090857600080fd5b600054600160a060020a0316ff5b5b565b60025481565b600054600160a060020a031681565b60095442115b90565b600a5481565b60095481565b6000805b600f5460ff16600581111561095857fe5b1480610975575060015b600f5460ff16600581111561097357fe5b145b8015610986575061098461092e565b155b90505b90565b60005433600160a060020a039081169116146109a757600080fd5b6109af610b16565b6109b76108b8565b15156109c257600080fd5b600f80546005919060ff19166001835b021790555033600160a060020a03166108fc30600160a060020a0316319081150290604051600060405180830381858888f19350505050151561064f57600f80546004919060ff1916600183610649565b02179055505b5b5b565b600b5481565b600254600d54145b90565b600d5481565b60015481565b600e602052600090815260409020805460018201546002830154600390930154600160a060020a0390921692909160ff8082169161010090041685565b60085481565b60005433600160a060020a03908116911614610aa857600080fd5b600160a060020a0381161561077a576000805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b5b50565b60045481565b60005433600160a060020a03908116911614610b0657600080fd5b80600160a060020a0316ff5b5b50565b610b1e610bc4565b61064f610b29565b5b565b60015b600f5460ff166005811115610b3d57fe5b1415610b6357600a54421115610b6357600f80546003919060ff19166001835b02179055505b5b60015b600f5460ff166005811115610b7857fe5b1480610b95575060035b600f5460ff166005811115610b9357fe5b145b8015610ba25750600b5442115b1561064f57600f80546004919060ff1916600183610649565b02179055505b5b565b60005b600f5460ff166005811115610bd857fe5b14610be25761064f565b610bea610a33565b15610c0857600f80546001919060ff191682805b021790555061064f565b610c1061092e565b8015610c1f5750610c1f610780565b5b15610c4357600f80546002919060ff1916600183610bfe565b021790555061064f565b610c4b61092e565b1561064f57600f80546002919060ff1916600183610649565b02179055505b5b5b5b5600a165627a7a723058209ca1aa1dfc3255ca81b1657c8bbf85590d1e587bad3c3ed92a900e32cabcc9990029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1506445637832
+}
